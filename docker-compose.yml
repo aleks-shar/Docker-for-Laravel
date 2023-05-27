@@ -1,0 +1,56 @@
+# Версия docker-compose
+version: '3'
+# Список наших сервисов (контейнеров)
+services:
+    nginx:
+        image: nginx:alpine
+        container_name: nginx_test
+        ports:
+            - "8081:80"
+            - "4433:443"
+        volumes:
+            - ./hosts:/etc/nginx/conf.d
+            - ./www:/var/www
+            - ./logs/nginx:/var/log/nginx
+        links:
+            - php
+    php:
+        build: ./images/php
+        container_name: php_test
+        links:
+            - db
+        volumes:
+            - ./www:/var/www
+    db:
+        image: mysql:latest
+        container_name: db
+        restart: always
+        ports:
+            - "3308:3306"
+        volumes:
+            - ./etc/mysql/my.cnf:/etc/mysql/my.cnf
+            - ./logs/mysql:/var/log/mysql
+            - ./mysql:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: laravel
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: laravel
+    adminer:
+        image: adminer
+        container_name: adminer_test
+        links:
+            - db
+        ports:
+            - 8082:8080
+    phpmyadmin:
+        image: phpmyadmin:latest
+        container_name: phpmyadmin_test
+        restart: always
+        environment:
+            PMA_HOST: db
+            #PMA_PORT: 3306
+            PMA_USER: root
+            PMA_PASSWORD: root
+        ports:
+        - 8083:80
