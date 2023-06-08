@@ -1,6 +1,4 @@
-# Версия docker-compose
 version: '3'
-# Список наших сервисов (контейнеров)
 services:
     nginx:
         image: nginx:alpine
@@ -19,6 +17,7 @@ services:
         container_name: php_test
         links:
             - db
+            - postgres
         volumes:
             - ./www:/var/www
     db:
@@ -43,6 +42,7 @@ services:
         container_name: adminer_test
         links:
             - db
+            - postgres
         ports:
             - 8082:8080
     phpmyadmin:
@@ -58,3 +58,14 @@ services:
             PMA_PASSWORD: ${DB_ROOT_PASSWORD}
         ports:
         - 8083:80
+    postgres:
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_DB: ${DB_NAME}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+        ports:
+            - "5433:5432"

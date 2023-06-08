@@ -1,10 +1,5 @@
-# Для начала указываем исходный образ, он будет использован как основа
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
-# RUN выполняет идущую за ней команду в контексте нашего образа.
-# В данном случае мы установим некоторые зависимости и модули PHP.
-# Для установки модулей используем команду docker-php-ext-install.
-# На каждый RUN создается новый слой в образе, поэтому рекомендуется объединять команды.
 RUN apt-get update && apt-get install -y \
         curl \
         wget \
@@ -20,31 +15,25 @@ RUN apt-get update && apt-get install -y \
         && docker-php-ext-install -j$(nproc) iconv mbstring mysqli pdo_mysql zip \
 	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
         && docker-php-ext-install -j$(nproc) gd 
+RUN apt-get update && \
+    apt-get install -y libpq-dev && \
+    docker-php-ext-install pdo pdo_pgsql pgsql
 
-# Куда же без composer'а.
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Добавим свой php.ini, можем в нем определять свои значения конфига
 ADD php.ini /usr/local/etc/php/conf.d/40-custom.ini
 
-# Указываем рабочую директорию для PHP
 WORKDIR /var/www
 
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
 
-# Copy existing application directory contents
 COPY . /var/www
 
-# Copy existing application directory permissions
 COPY --chown=www:www . /var/www
 
-# Change current user to www
 USER www
 
-# Expose port 9000 and start php-fpm server
 EXPOSE 9000
-# Запускаем контейнер
-# Из документации: The main purpose of a CMD is to provide defaults for an executing container. These defaults can include an executable, 
-# or they can omit the executable, in which case you must specify an ENTRYPOINT instruction as well.
+
 CMD ["php-fpm"]
