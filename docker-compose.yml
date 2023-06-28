@@ -44,7 +44,7 @@ services:
             - db
             - postgres
         ports:
-            - 8082:8080
+            - "8082:8080"
     phpmyadmin:
         image: phpmyadmin:latest
         container_name: phpmyadmin_test
@@ -57,9 +57,10 @@ services:
             PMA_USER: root
             PMA_PASSWORD: ${DB_ROOT_PASSWORD}
         ports:
-        - 8083:80
+            - "8083:80"
     postgres:
         image: postgres:latest
+        container_name: postgres_test
         restart: always
         environment:
             POSTGRES_DB: ${DB_NAME}
@@ -69,3 +70,13 @@ services:
             - ./pgdata:/var/lib/postgresql/data
         ports:
             - "5433:5432"
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin_test
+        environment:
+            PGADMIN_DEFAULT_EMAIL: user@domain.com
+            PGADMIN_DEFAULT_PASSWORD: pgadmin
+        links:
+            - postgres
+        ports:
+            - "8084:80"
