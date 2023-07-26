@@ -80,3 +80,12 @@ services:
             - postgres
         ports:
             - "8084:80"
+
+    cron:
+        container_name: cron
+        build: ./images/cron
+        volumes:
+        - ./www:/var/www
+        - ./log/cron:/var/log/cron
+      #  - ./images/cron/crontabs:/var/spool/cron/crontabs
+        

@@ -30,24 +30,17 @@ RUN pecl install redis-5.3.7 \
 	&& pecl install xdebug-3.2.1 \
 	&& docker-php-ext-enable redis xdebug
 
-ADD xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
 
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 ADD php.ini /usr/local/etc/php/conf.d/40-custom.ini
 
-WORKDIR /var/www
 
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
+RUN mkdir /var/log/cron
 
-COPY . /var/www
+COPY --chown=root:crontab --chmod=0600 ./crontabs/root /var/spool/cron/crontabs/root
 
-COPY --chown=www:www . /var/www
+CMD ["cron", "-f"]
 
-USER www
-
-EXPOSE 9000
-
-CMD php-fpm
